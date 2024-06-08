@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication, QStackedWidget
 from pages.login_window import LoginWindow
 from pages.register_window import RegisterWindow
 from pages.main_window import MainWindow
-
+from pages.change_password_page import ChangePasswordPage
 
 class MainApp(QStackedWidget):
     def __init__(self):
@@ -13,7 +13,7 @@ class MainApp(QStackedWidget):
     def initUI(self):
         self.loginWindow = LoginWindow(self.switch_to_register, self.switch_to_main)
         self.registerWindow = RegisterWindow(self.switch_to_login)
-        self.mainWindow = MainWindow(self.switch_to_login)
+        self.mainWindow = MainWindow(self.switch_to_login, self)
 
         self.addWidget(self.loginWindow)
         self.addWidget(self.registerWindow)
@@ -31,7 +31,6 @@ class MainApp(QStackedWidget):
 
     def switch_to_main(self):
         self.setCurrentIndex(2)
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

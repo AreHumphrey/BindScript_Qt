@@ -6,12 +6,13 @@ from pages.account_page import AccountPage
 from pages.binds_page import BindsPage
 from pages.subscription_page import SubscriptionPage
 from pages.settings_page import SettingsPage
-
+from pages.change_password_page import ChangePasswordPage
 
 class MainWindow(QWidget):
-    def __init__(self, switch_to_login):
+    def __init__(self, switch_to_login, main_app):
         super().__init__()
         self.switch_to_login = switch_to_login
+        self.main_app = main_app
         self.user_data = {
             "username": "Artem#1",
             "subscription_end": "08.01.2023",
@@ -72,28 +73,24 @@ class MainWindow(QWidget):
             }
         """)
 
-        contentWidget = QStackedWidget(self)
+        # Виджет с переключающимися страницами
+        self.contentWidget = QStackedWidget(self)
+        self.accountPage = AccountPage(self.user_data, self.switch_to_change_password)
+        self.contentWidget.addWidget(self.accountPage)
+        self.contentWidget.addWidget(BindsPage())
+        self.contentWidget.addWidget(SubscriptionPage(self.user_data))
+        self.contentWidget.addWidget(SettingsPage())
+        self.changePasswordPage = ChangePasswordPage(self.switch_to_account)
+        self.contentWidget.addWidget(self.changePasswordPage)
 
-        accountPage = AccountPage(self.user_data)
-        contentWidget.addWidget(accountPage)
-
-        bindsPage = BindsPage()
-        contentWidget.addWidget(bindsPage)
-
-        subscriptionPage = SubscriptionPage(self.user_data)
-        contentWidget.addWidget(subscriptionPage)
-
-        settingsPage = SettingsPage()
-        contentWidget.addWidget(settingsPage)
-
-        listWidget.currentRowChanged.connect(contentWidget.setCurrentIndex)
+        listWidget.currentRowChanged.connect(self.contentWidget.setCurrentIndex)
 
         leftLayout.addWidget(listWidget)
         leftLayout.addStretch()
 
         contentLayout = QHBoxLayout()
         contentLayout.addLayout(leftLayout, 1)
-        contentLayout.addWidget(contentWidget, 3)
+        contentLayout.addWidget(self.contentWidget, 3)
 
         mainLayout.addLayout(topLayout)
         mainLayout.addLayout(contentLayout)
@@ -103,3 +100,9 @@ class MainWindow(QWidget):
         self.setPalette(palette)
         self.setAutoFillBackground(True)
         self.setLayout(mainLayout)
+
+    def switch_to_change_password(self):
+        self.contentWidget.setCurrentWidget(self.changePasswordPage)
+
+    def switch_to_account(self):
+        self.contentWidget.setCurrentWidget(self.accountPage)

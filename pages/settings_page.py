@@ -8,8 +8,7 @@ class SettingsPage(QWidget):
 
     def initUI(self):
         layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignTop | Qt.AlignCenter)
-        layout.setContentsMargins(0, 100, 0, 0)
+        layout.setContentsMargins(200, 0, 0, 0)
 
         label = QLabel("Внимание - скрипт работает только на\nразрешении экрана 1920x1080.\nВ дальнейшем мы добавим другие разрешения", self)
         label.setStyleSheet("color: white; font-size: 24px;")
