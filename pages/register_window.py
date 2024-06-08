@@ -86,7 +86,6 @@ class RegisterWindow(QWidget):
         inputLayout.addWidget(confirmPasswordInput)
         inputLayout.addSpacing(40)
 
-        # Кнопка регистрации
         buttonLayout = QHBoxLayout()
         buttonLayout.setAlignment(Qt.AlignCenter)
         registerButton = QPushButton("Зарегистрироваться")
@@ -101,7 +100,6 @@ class RegisterWindow(QWidget):
         """)
         buttonLayout.addWidget(registerButton)
 
-        # Ссылка на вход
         loginLabel = QPushButton("Есть аккаунт? Войти")
         loginLabel.setFont(QFont("Arial", 10))
         loginLabel.setStyleSheet("color: #2D8CFF; background-color: transparent; border: none;")
@@ -114,7 +112,6 @@ class RegisterWindow(QWidget):
         mainLayout.addLayout(inputLayout)
         mainLayout.addStretch(1)
 
-        # Настройка фона
         palette = QPalette()
         palette.setColor(QPalette.Background, QColor("#282B3A"))
         self.setPalette(palette)

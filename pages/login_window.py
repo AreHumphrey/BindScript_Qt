@@ -87,7 +87,6 @@ class LoginWindow(QWidget):
         buttonLayout.addWidget(loginButton)
         loginButton.clicked.connect(self.switch_to_main)
 
-        # Ссылка на регистрацию
         registerLabel = QPushButton("Нет аккаунта? Зарегистрироваться")
         registerLabel.setFont(QFont("Arial", 10))
         registerLabel.setStyleSheet("color: #2D8CFF; background-color: transparent; border: none;")

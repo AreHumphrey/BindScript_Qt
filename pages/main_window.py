@@ -7,6 +7,7 @@ from pages.binds_page import BindsPage
 from pages.subscription_page import SubscriptionPage
 from pages.settings_page import SettingsPage
 
+
 class MainWindow(QWidget):
     def __init__(self, switch_to_login):
         super().__init__()
@@ -14,13 +15,7 @@ class MainWindow(QWidget):
         self.user_data = {
             "username": "Artem#1",
             "subscription_end": "08.01.2023",
-            "registration_date": "08.01.2032",
-            "binds": {
-                "Уборная": "-",
-                "Полы": "-",
-                "Бургеры": "-",
-                "Мусор": "U"
-            }
+            "registration_date": "08.01.2032"
         }
         self.initUI()
 
@@ -33,9 +28,9 @@ class MainWindow(QWidget):
 
         # Верхняя панель
         topLayout = QHBoxLayout()
-        topLayout.setAlignment(Qt.AlignRight)  # Выровнять элементы по правому краю
+        topLayout.setAlignment(Qt.AlignRight)
         userLabel = QLabel(self.user_data["username"])
-        userLabel.setStyleSheet("color: white; font-size: 24px;")
+        userLabel.setStyleSheet("color: white; font-size: 24px; ")
         logoutButton = QPushButton("выйти")
         logoutButton.setFixedSize(100, 40)
         logoutButton.setStyleSheet("color: white; background-color: #282B3A; border: none; font-size: 24px;")
@@ -46,7 +41,7 @@ class MainWindow(QWidget):
         # Левый боковой список
         leftLayout = QVBoxLayout()
         titleLabel = QLabel("FocusAPP")
-        titleLabel.setFont(QFont("Arial", 24, QFont.Bold))
+        titleLabel.setFont(QFont("Arial", 30, QFont.Bold))
         titleLabel.setStyleSheet("color: white;")
         titleLabel.setAlignment(Qt.AlignLeft)
         leftLayout.addWidget(titleLabel)
@@ -62,7 +57,7 @@ class MainWindow(QWidget):
             QListWidget {
                 color: white;
                 background-color: #282B3A;
-                font-size: 24px;
+                font-size: 40px;
                 border: none;
             }
             QListWidget::item {
@@ -77,15 +72,17 @@ class MainWindow(QWidget):
             }
         """)
 
-        # Виджет с переключающимися страницами
         contentWidget = QStackedWidget(self)
-        contentWidget.setContentsMargins(0, 30, 0, 0)  # Добавить верхний отступ в 30 пикселей
+
         accountPage = AccountPage(self.user_data)
         contentWidget.addWidget(accountPage)
-        bindsPage = BindsPage(self.user_data["binds"])  # Передача данных биндов
+
+        bindsPage = BindsPage()
         contentWidget.addWidget(bindsPage)
-        subscriptionPage = SubscriptionPage(self.user_data)  # Передача данных пользователя
+
+        subscriptionPage = SubscriptionPage(self.user_data)
         contentWidget.addWidget(subscriptionPage)
+
         settingsPage = SettingsPage()
         contentWidget.addWidget(settingsPage)
 
@@ -94,7 +91,6 @@ class MainWindow(QWidget):
         leftLayout.addWidget(listWidget)
         leftLayout.addStretch()
 
-        # Создание горизонтального макета для контента
         contentLayout = QHBoxLayout()
         contentLayout.addLayout(leftLayout, 1)
         contentLayout.addWidget(contentWidget, 3)
@@ -102,7 +98,6 @@ class MainWindow(QWidget):
         mainLayout.addLayout(topLayout)
         mainLayout.addLayout(contentLayout)
 
-        # Настройка фона
         palette = QPalette()
         palette.setColor(QPalette.Background, QColor("#282B3A"))
         self.setPalette(palette)

@@ -15,27 +15,33 @@ class AccountPage(QWidget):
 
         subscriptionLayout = QVBoxLayout()
         subscriptionLayout.setAlignment(Qt.AlignCenter)
+
         subscriptionLabel = QLabel("Подписка", self)
         subscriptionLabel.setStyleSheet("color: white; font-size: 18px; font-weight: bold; border: none")
         subscriptionEndLabel = QLabel(f"Активна до {self.user_data['subscription_end']}", self)
         subscriptionEndLabel.setStyleSheet("color: white; font-size: 20px; border: none")
+
         subscriptionBox = QWidget()
         subscriptionBox.setFixedWidth(400)
         subscriptionBox.setLayout(subscriptionLayout)
         subscriptionBox.setStyleSheet("border: 2px solid white; border-radius: 15px; padding: 10px;")
+
         subscriptionLayout.addWidget(subscriptionLabel)
         subscriptionLayout.addWidget(subscriptionEndLabel)
 
         registrationLayout = QVBoxLayout()
         registrationLayout.setAlignment(Qt.AlignCenter)
+
         registrationLabel = QLabel("Дата регистрации", self)
         registrationLabel.setStyleSheet("color: white; font-size: 18px; font-weight: bold; border: none")
         registrationDateLabel = QLabel(self.user_data['registration_date'], self)
         registrationDateLabel.setStyleSheet("color: white; font-size: 20px; border: none")
+
         registrationBox = QWidget()
         registrationBox.setFixedWidth(400)
         registrationBox.setLayout(registrationLayout)
         registrationBox.setStyleSheet("border: 2px solid white; border-radius: 15px; padding: 10px;")
+
         registrationLayout.addWidget(registrationLabel)
         registrationLayout.addWidget(registrationDateLabel)
 
@@ -44,6 +50,7 @@ class AccountPage(QWidget):
         containerLayout.addWidget(subscriptionBox)
         containerLayout.addSpacing(20)
         containerLayout.addWidget(registrationBox)
+
         containerBox = QWidget()
         containerBox.setLayout(containerLayout)
         containerBox.setStyleSheet("border: none;")
