@@ -1,4 +1,3 @@
-import json
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget, QStackedWidget, QHBoxLayout
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt
@@ -12,19 +11,18 @@ class MainWindow(QWidget):
     def __init__(self, switch_to_login):
         super().__init__()
         self.switch_to_login = switch_to_login
-        self.user_data = self.load_user_data()
-        self.initUI()
-
-    def load_user_data(self):
-        try:
-            with open('user_data.json', 'r') as file:
-                return json.load(file)
-        except FileNotFoundError:
-            return {
-                "username": "Лохушка",
-                "subscription_end": "08.01.2023",
-                "registration_date": "08.01.2032"
+        self.user_data = {
+            "username": "Artem#1",
+            "subscription_end": "08.01.2023",
+            "registration_date": "08.01.2032",
+            "binds": {
+                "Уборная": "-",
+                "Полы": "-",
+                "Бургеры": "-",
+                "Мусор": "U"
             }
+        }
+        self.initUI()
 
     def initUI(self):
         self.setWindowTitle("FocusAPP")
@@ -50,10 +48,8 @@ class MainWindow(QWidget):
         titleLabel = QLabel("FocusAPP")
         titleLabel.setFont(QFont("Arial", 24, QFont.Bold))
         titleLabel.setStyleSheet("color: white;")
-        titleLabel.setAlignment(Qt.AlignCenter)
+        titleLabel.setAlignment(Qt.AlignLeft)
         leftLayout.addWidget(titleLabel)
-        leftLayout.addStretch()
-        leftLayout.addLayout(topLayout)
 
         listWidget = QListWidget(self)
         listWidget.addItem("Аккаунт")
@@ -83,11 +79,12 @@ class MainWindow(QWidget):
 
         # Виджет с переключающимися страницами
         contentWidget = QStackedWidget(self)
+        contentWidget.setContentsMargins(0, 30, 0, 0)  # Добавить верхний отступ в 30 пикселей
         accountPage = AccountPage(self.user_data)
         contentWidget.addWidget(accountPage)
-        bindsPage = BindsPage()
+        bindsPage = BindsPage(self.user_data["binds"])  # Передача данных биндов
         contentWidget.addWidget(bindsPage)
-        subscriptionPage = SubscriptionPage()
+        subscriptionPage = SubscriptionPage(self.user_data)  # Передача данных пользователя
         contentWidget.addWidget(subscriptionPage)
         settingsPage = SettingsPage()
         contentWidget.addWidget(settingsPage)
@@ -97,10 +94,12 @@ class MainWindow(QWidget):
         leftLayout.addWidget(listWidget)
         leftLayout.addStretch()
 
-        mainLayout.addLayout(topLayout)
+        # Создание горизонтального макета для контента
         contentLayout = QHBoxLayout()
         contentLayout.addLayout(leftLayout, 1)
         contentLayout.addWidget(contentWidget, 3)
+
+        mainLayout.addLayout(topLayout)
         mainLayout.addLayout(contentLayout)
 
         # Настройка фона

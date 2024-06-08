@@ -10,7 +10,8 @@ class AccountPage(QWidget):
 
     def initUI(self):
         layout = QVBoxLayout(self)
-        layout.setAlignment(Qt.AlignCenter)
+        layout.setAlignment(Qt.AlignTop | Qt.AlignCenter)
+        layout.setContentsMargins(200, 100, 0, 0)
 
         subscriptionLayout = QVBoxLayout()
         subscriptionLayout.setAlignment(Qt.AlignCenter)
