@@ -20,7 +20,7 @@ class MainApp(QStackedWidget):
         self.addWidget(self.mainWindow)
 
         self.setWindowTitle("FocusAPP")
-        self.setFixedSize(960, 540)
+        self.setFixedSize(1280, 720)
         self.setCurrentIndex(0)
 
     def switch_to_register(self):

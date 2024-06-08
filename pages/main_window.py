@@ -1,28 +1,67 @@
+import json
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget, QStackedWidget, QHBoxLayout
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt
+
+from pages.account_page import AccountPage
+from pages.binds_page import BindsPage
+from pages.subscription_page import SubscriptionPage
+from pages.settings_page import SettingsPage
 
 class MainWindow(QWidget):
     def __init__(self, switch_to_login):
         super().__init__()
         self.switch_to_login = switch_to_login
+        self.user_data = self.load_user_data()
         self.initUI()
+
+    def load_user_data(self):
+        try:
+            with open('user_data.json', 'r') as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return {
+                "username": "Лохушка",
+                "subscription_end": "08.01.2023",
+                "registration_date": "08.01.2032"
+            }
 
     def initUI(self):
         self.setWindowTitle("FocusAPP")
         self.resize(1280, 720)
 
         # Основной макет
-        mainLayout = QHBoxLayout(self)
+        mainLayout = QVBoxLayout(self)
+
+        # Верхняя панель
+        topLayout = QHBoxLayout()
+        topLayout.setAlignment(Qt.AlignRight)  # Выровнять элементы по правому краю
+        userLabel = QLabel(self.user_data["username"])
+        userLabel.setStyleSheet("color: white; font-size: 24px;")
+        logoutButton = QPushButton("выйти")
+        logoutButton.setFixedSize(100, 40)
+        logoutButton.setStyleSheet("color: white; background-color: #282B3A; border: none; font-size: 24px;")
+        logoutButton.clicked.connect(self.switch_to_login)
+        topLayout.addWidget(userLabel)
+        topLayout.addWidget(logoutButton)
 
         # Левый боковой список
+        leftLayout = QVBoxLayout()
+        titleLabel = QLabel("FocusAPP")
+        titleLabel.setFont(QFont("Arial", 24, QFont.Bold))
+        titleLabel.setStyleSheet("color: white;")
+        titleLabel.setAlignment(Qt.AlignCenter)
+        leftLayout.addWidget(titleLabel)
+        leftLayout.addStretch()
+        leftLayout.addLayout(topLayout)
+
         listWidget = QListWidget(self)
         listWidget.addItem("Аккаунт")
         listWidget.addItem("Бинды")
         listWidget.addItem("Подписка")
         listWidget.addItem("Настройки")
         listWidget.setFixedWidth(250)
-        listWidget.setFixedHeight(400)  # Ensure all items are visible without scrolling
+        listWidget.setFixedHeight(400)
         listWidget.setStyleSheet("""
             QListWidget {
                 color: white;
@@ -44,67 +83,25 @@ class MainWindow(QWidget):
 
         # Виджет с переключающимися страницами
         contentWidget = QStackedWidget(self)
-
-        # Страница "Аккаунт"
-        accountPage = QWidget()
-        accountLayout = QVBoxLayout(accountPage)
-        accountLabel = QLabel("Ваш айди - Artem#1\nПодписка активна до 08.01.2023\nДата регистрации: 08.01.2032", self)
-        accountLabel.setStyleSheet("color: white; font-size: 18px;")
-        accountLayout.addWidget(accountLabel)
+        accountPage = AccountPage(self.user_data)
         contentWidget.addWidget(accountPage)
-
-        # Страница "Бинды"
-        bindsPage = QWidget()
-        bindsLayout = QVBoxLayout(bindsPage)
-        bindsLabel = QLabel("Управление биндами", self)
-        bindsLabel.setStyleSheet("color: white; font-size: 18px;")
-        bindsLayout.addWidget(bindsLabel)
+        bindsPage = BindsPage()
         contentWidget.addWidget(bindsPage)
-
-        # Страница "Подписка"
-        subscriptionPage = QWidget()
-        subscriptionLayout = QVBoxLayout(subscriptionPage)
-        subscriptionLabel = QLabel("Ваш айди - Artem#1\nКупить подписку можно в нашем телеграм-боте", self)
-        subscriptionLabel.setStyleSheet("color: white; font-size: 18px;")
-        telegramButton = QPushButton("Перейти в телеграм-бот", self)
-        telegramButton.setStyleSheet("background-color: white; color: black; border-radius: 10px;")
-        subscriptionLayout.addWidget(subscriptionLabel)
-        subscriptionLayout.addWidget(telegramButton)
+        subscriptionPage = SubscriptionPage()
         contentWidget.addWidget(subscriptionPage)
-
-        # Страница "Настройки"
-        settingsPage = QWidget()
-        settingsLayout = QVBoxLayout(settingsPage)
-        settingsLabel = QLabel("Внимание - скрипт работает только на разрешении экрана 1920x1080.\nВ дальнейшем мы добавим другие разрешения", self)
-        settingsLabel.setStyleSheet("color: white; font-size: 18px;")
-        settingsLayout.addWidget(settingsLabel)
+        settingsPage = SettingsPage()
         contentWidget.addWidget(settingsPage)
 
         listWidget.currentRowChanged.connect(contentWidget.setCurrentIndex)
 
-        # Верхняя панель
-        topLayout = QHBoxLayout()
-        userLabel = QLabel("Artem#1")
-        userLabel.setStyleSheet("color: white; font-size: 18px;")
-        logoutButton = QPushButton("выйти")
-        logoutButton.setStyleSheet("color: white; background-color: #282B3A; border: none;")
-        logoutButton.clicked.connect(self.switch_to_login)
-        topLayout.addWidget(userLabel)
-        topLayout.addStretch()
-        topLayout.addWidget(logoutButton)
-
-        leftLayout = QVBoxLayout()
-        titleLabel = QLabel("FocusAPP")
-        titleLabel.setFont(QFont("Arial", 24, QFont.Bold))
-        titleLabel.setStyleSheet("color: white;")
-        titleLabel.setAlignment(Qt.AlignCenter)
-        leftLayout.addWidget(titleLabel)
-        leftLayout.addLayout(topLayout)
         leftLayout.addWidget(listWidget)
         leftLayout.addStretch()
 
-        mainLayout.addLayout(leftLayout, 1)
-        mainLayout.addWidget(contentWidget, 3)
+        mainLayout.addLayout(topLayout)
+        contentLayout = QHBoxLayout()
+        contentLayout.addLayout(leftLayout, 1)
+        contentLayout.addWidget(contentWidget, 3)
+        mainLayout.addLayout(contentLayout)
 
         # Настройка фона
         palette = QPalette()
