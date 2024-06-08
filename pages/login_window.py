@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QHBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt
 
@@ -20,13 +20,16 @@ class LoginWindow(QWidget):
         headerLayout = QHBoxLayout()
         headerLayout.setAlignment(Qt.AlignLeft)
         titleLabel = QLabel("FocusAPP")
-        titleLabel.setFont(QFont("Arial", 24, QFont.Bold))
-        titleLabel.setStyleSheet("color: white;")
+        titleLabel.setFont(QFont("Arial", 30, QFont.Bold))
+        titleLabel.setStyleSheet("color: white; padding: 20px; font-weight: bold;")
         headerLayout.addWidget(titleLabel)
         mainLayout.addLayout(headerLayout)
 
+        spacer = QSpacerItem(20, 100, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        mainLayout.addItem(spacer)
+
         subtitleLabel = QLabel("Войти")
-        subtitleLabel.setFont(QFont("Arial", 18))
+        subtitleLabel.setFont(QFont("Arial", 30, QFont.Bold))
         subtitleLabel.setAlignment(Qt.AlignCenter)
         subtitleLabel.setStyleSheet("color: white;")
         mainLayout.addWidget(subtitleLabel)
@@ -97,7 +100,6 @@ class LoginWindow(QWidget):
         mainLayout.addLayout(inputLayout)
         mainLayout.addStretch(1)
 
-        # Настройка фона
         palette = QPalette()
         palette.setColor(QPalette.Background, QColor("#282B3A"))
         self.setPalette(palette)

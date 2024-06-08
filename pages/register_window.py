@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QLineEdit, QHBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt
 
@@ -19,14 +19,16 @@ class RegisterWindow(QWidget):
         headerLayout = QHBoxLayout()
         headerLayout.setAlignment(Qt.AlignLeft)
         titleLabel = QLabel("FocusAPP")
-        titleLabel.setFont(QFont("Arial", 24, QFont.Bold))
+        titleLabel.setFont(QFont("Arial", 30, QFont.Bold))
         titleLabel.setStyleSheet("color: white; padding: 20px; font-weight: bold;")
         headerLayout.addWidget(titleLabel)
         mainLayout.addLayout(headerLayout)
 
-        # Добавление заголовка "Регистрация"
+        spacer = QSpacerItem(20, 100, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        mainLayout.addItem(spacer)
+
         subtitleLabel = QLabel("Регистрация")
-        subtitleLabel.setFont(QFont("Arial", 26))
+        subtitleLabel.setFont(QFont("Arial", 30, QFont.Bold))
         subtitleLabel.setAlignment(Qt.AlignCenter)
         subtitleLabel.setStyleSheet("color: white; font-weight: bold; ")
         mainLayout.addWidget(subtitleLabel)
