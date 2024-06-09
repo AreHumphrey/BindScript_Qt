@@ -1,20 +1,24 @@
 from rest_framework import serializers
 from .models import CustomUser, Session
 
+
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'date_joined', 'last_login']
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'hwid', 'registration_date']
 
+
 class SessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
         fields = ['id', 'session_key', 'created_at', 'expires_at']
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -51,9 +55,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create_user(**validated_data)
         return user
 
+
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField()

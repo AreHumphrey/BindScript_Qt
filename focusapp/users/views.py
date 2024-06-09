@@ -3,29 +3,34 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import authenticate, login, update_session_auth_hash
-
 from .models import CustomUser, Session
-from .serializers import UserSerializer, SessionSerializer, CustomUserSerializer, UserCreateSerializer, ChangePasswordSerializer, LoginSerializer
+from .serializers import UserSerializer, SessionSerializer, CustomUserSerializer, UserCreateSerializer, \
+    ChangePasswordSerializer, LoginSerializer
 
 APPROVED_IPS = ['127.0.0.1']
+
 
 class CustomUserList(generics.ListCreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
 
+
 class CustomUserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
 
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
 
+
 class SessionViewSet(viewsets.ModelViewSet):
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
@@ -38,6 +43,7 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
+
 class LoginView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
     serializer_class = LoginSerializer
@@ -45,11 +51,23 @@ class LoginView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         username = request.data.get("username")
         password = request.data.get("password")
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
-        return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        print(f"Attempting login with username: {username} and password: {password}")
+
+        # Проверка существования пользователя
+        try:
+            user = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            print(f"User {username} does not exist")
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Проверка пароля
+        if not user.check_password(password):
+            print(f"Password for user {username} is incorrect")
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+        login(request, user)
+        return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+
 
 class ChangePasswordView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
@@ -73,6 +91,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
 
+
 @api_view(['POST'])
 def check_hwid(request):
     user = CustomUser.objects.get(username=request.data['username'])
@@ -86,6 +105,7 @@ def check_hwid(request):
         return Response({"status": "approved"})
     else:
         return Response({"status": "denied"})
+
 
 @api_view(['POST'])
 def reset_hwid(request):
