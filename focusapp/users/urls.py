@@ -8,3 +8,4 @@ urlpatterns = [
     path('', CustomUserList.as_view(), name='customuser-list'),
     path('<int:pk>/', CustomUserDetail.as_view(), name='customuser-detail'),
 ]
+

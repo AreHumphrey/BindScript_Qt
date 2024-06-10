@@ -53,14 +53,12 @@ class LoginView(generics.GenericAPIView):
         password = request.data.get("password")
         print(f"Attempting login with username: {username} and password: {password}")
 
-        # Проверка существования пользователя
         try:
             user = CustomUser.objects.get(username=username)
         except CustomUser.DoesNotExist:
             print(f"User {username} does not exist")
             return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Проверка пароля
         if not user.check_password(password):
             print(f"Password for user {username} is incorrect")
             return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)

@@ -39,11 +39,11 @@ class LoginWindow(QWidget):
         inputLayout = QVBoxLayout()
         inputLayout.setAlignment(Qt.AlignCenter)
 
-        self.loginInput = QLineEdit()
-        self.loginInput.setPlaceholderText("Логин")
-        self.loginInput.setFixedHeight(60)
-        self.loginInput.setFixedWidth(self.width() // 2)
-        self.loginInput.setStyleSheet("""
+        self.usernameInput = QLineEdit()
+        self.usernameInput.setPlaceholderText("Логин")
+        self.usernameInput.setFixedHeight(60)
+        self.usernameInput.setFixedWidth(self.width() // 2)
+        self.usernameInput.setStyleSheet("""
             background-color: #282B3A;
             color: white;
             border: 2px solid white;
@@ -66,11 +66,12 @@ class LoginWindow(QWidget):
             font-size: 18px;
         """)
 
-        inputLayout.addWidget(self.loginInput)
+        inputLayout.addWidget(self.usernameInput)
         inputLayout.addSpacing(40)
         inputLayout.addWidget(self.passwordInput)
         inputLayout.addSpacing(40)
 
+        # Кнопка входа
         buttonLayout = QHBoxLayout()
         buttonLayout.setAlignment(Qt.AlignCenter)
         loginButton = QPushButton("Войти")
@@ -104,7 +105,7 @@ class LoginWindow(QWidget):
         self.setAutoFillBackground(True)
 
     def handle_login(self):
-        username = self.loginInput.text()
+        username = self.usernameInput.text()
         password = self.passwordInput.text()
         response = requests.post('http://127.0.0.1:8000/api/users/login/', data={
             'username': username,
