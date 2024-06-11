@@ -84,7 +84,7 @@ class MainWindow(QWidget):
         self.contentWidget.addWidget(BindsPage())
         self.contentWidget.addWidget(SubscriptionPage(self.user_data))
         self.contentWidget.addWidget(SettingsPage())
-        self.changePasswordPage = ChangePasswordPage(self.switch_to_account)
+        self.changePasswordPage = ChangePasswordPage(self.switch_to_account, self.tokens)
         self.contentWidget.addWidget(self.changePasswordPage)
 
         listWidget.currentRowChanged.connect(self.contentWidget.setCurrentIndex)
@@ -106,6 +106,7 @@ class MainWindow(QWidget):
         self.setLayout(mainLayout)
 
     def switch_to_change_password(self):
+        self.changePasswordPage.tokens = self.tokens  # Ensure tokens are set before switching
         self.contentWidget.setCurrentWidget(self.changePasswordPage)
 
     def switch_to_account(self):

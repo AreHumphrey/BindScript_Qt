@@ -1,10 +1,12 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton
 from PyQt5.QtCore import Qt
+import requests
 
 class ChangePasswordPage(QWidget):
-    def __init__(self, switch_to_account):
+    def __init__(self, switch_to_account, tokens):
         super().__init__()
         self.switch_to_account = switch_to_account
+        self.tokens = tokens
         self.initUI()
 
     def initUI(self):
@@ -83,7 +85,22 @@ class ChangePasswordPage(QWidget):
             print("Новые пароли не совпадают")
             return
 
-        # Логика проверки старого пароля и смены на новый
+        headers = {
+            'Authorization': f'Bearer {self.tokens["access"]}'
+        }
+        data = {
+            'old_password': old_password,
+            'new_password': new_password,
+            'confirm_password': confirm_password
+        }
 
-        print("Пароль изменен")
-        self.switch_to_account()
+        try:
+            response = requests.put('http://127.0.0.1:8000/api/users/change-password/', headers=headers, data=data)
+
+            if response.status_code == 200:
+                print("Пароль изменен успешно")
+                self.switch_to_account()
+            else:
+                print(f"Ошибка при изменении пароля: {response.json()}")
+        except Exception as e:
+            print(f"Ошибка при изменении пароля: {e}")
