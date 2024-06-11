@@ -40,7 +40,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'focusapp.subscriptions.middleware.IPCheckMiddleware'  # Убедитесь, что путь правильный
 ]
 
 ROOT_URLCONF = "focusapp.urls"

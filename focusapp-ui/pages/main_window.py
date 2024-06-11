@@ -1,7 +1,9 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget, QStackedWidget, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget, QStackedWidget, QHBoxLayout, QMessageBox
 from PyQt5.QtGui import QFont, QPalette, QColor
 from PyQt5.QtCore import Qt, QTimer
 import requests
+import datetime
+import jwt
 
 from .account_page import AccountPage
 from .binds_page import BindsPage
@@ -39,11 +41,10 @@ class MainWindow(QWidget):
         logoutButton = QPushButton("выйти")
         logoutButton.setFixedSize(100, 40)
         logoutButton.setStyleSheet("color: white; background-color: #282B3A; border: none; font-size: 24px;")
-        logoutButton.clicked.connect(self.switch_to_login)
+        logoutButton.clicked.connect(self.logout)
         topLayout.addWidget(self.userLabel)
         topLayout.addWidget(logoutButton)
 
-        # Левый боковой список
         leftLayout = QVBoxLayout()
         titleLabel = QLabel("FocusAPP")
         titleLabel.setFont(QFont("Arial", 30, QFont.Bold))
@@ -51,14 +52,14 @@ class MainWindow(QWidget):
         titleLabel.setAlignment(Qt.AlignLeft)
         leftLayout.addWidget(titleLabel)
 
-        listWidget = QListWidget(self)
-        listWidget.addItem("Аккаунт")
-        listWidget.addItem("Бинды")
-        listWidget.addItem("Подписка")
-        listWidget.addItem("Настройки")
-        listWidget.setFixedWidth(250)
-        listWidget.setFixedHeight(400)
-        listWidget.setStyleSheet("""
+        self.listWidget = QListWidget(self)
+        self.listWidget.addItem("Аккаунт")
+        self.listWidget.addItem("Бинды")
+        self.listWidget.addItem("Подписка")
+        self.listWidget.addItem("Настройки")
+        self.listWidget.setFixedWidth(250)
+        self.listWidget.setFixedHeight(400)
+        self.listWidget.setStyleSheet("""
             QListWidget {
                 color: white;
                 background-color: #282B3A;
@@ -80,16 +81,17 @@ class MainWindow(QWidget):
         # Виджет с переключающимися страницами
         self.contentWidget = QStackedWidget(self)
         self.accountPage = AccountPage(self.user_data, self.switch_to_change_password)
+        self.subscriptionPage = SubscriptionPage(self.user_data)
         self.contentWidget.addWidget(self.accountPage)
         self.contentWidget.addWidget(BindsPage())
-        self.contentWidget.addWidget(SubscriptionPage(self.user_data))
+        self.contentWidget.addWidget(self.subscriptionPage)
         self.contentWidget.addWidget(SettingsPage())
         self.changePasswordPage = ChangePasswordPage(self.switch_to_account, self.tokens)
         self.contentWidget.addWidget(self.changePasswordPage)
 
-        listWidget.currentRowChanged.connect(self.contentWidget.setCurrentIndex)
+        self.listWidget.currentRowChanged.connect(self.handle_page_change)
 
-        leftLayout.addWidget(listWidget)
+        leftLayout.addWidget(self.listWidget)
         leftLayout.addStretch()
 
         contentLayout = QHBoxLayout()
@@ -105,6 +107,26 @@ class MainWindow(QWidget):
         self.setAutoFillBackground(True)
         self.setLayout(mainLayout)
 
+    def handle_page_change(self, index):
+        if index == 1:  # Индекс вкладки "Бинды"
+            subscription_end = self.user_data.get('subscription_end', None)
+            if subscription_end:
+                try:
+                    end_date = datetime.datetime.fromisoformat(subscription_end.replace('Z', '+00:00'))
+                    if end_date < datetime.datetime.now():
+                        self.listWidget.setCurrentRow(0)  # Возвращаемся на вкладку "Аккаунт"
+                        QMessageBox.warning(self, "Доступ запрещен", "Ваша подписка истекла. Пожалуйста, обновите подписку.")
+                        return
+                except ValueError:
+                    self.listWidget.setCurrentRow(0)  # Возвращаемся на вкладку "Аккаунт"
+                    QMessageBox.warning(self, "Доступ запрещен", "Неправильная дата окончания подписки. Пожалуйста, свяжитесь с поддержкой.")
+                    return
+            else:
+                self.listWidget.setCurrentRow(0)  # Возвращаемся на вкладку "Аккаунт"
+                QMessageBox.warning(self, "Доступ запрещен", "Подписка не найдена. Пожалуйста, приобретите подписку.")
+                return
+        self.contentWidget.setCurrentIndex(index)
+
     def switch_to_change_password(self):
         self.changePasswordPage.tokens = self.tokens  # Ensure tokens are set before switching
         self.contentWidget.setCurrentWidget(self.changePasswordPage)
@@ -115,11 +137,17 @@ class MainWindow(QWidget):
     def set_tokens(self, tokens):
         self.tokens = tokens
         self.accountPage.set_tokens(tokens)
+        self.subscriptionPage.set_tokens(tokens)  # Ensure tokens are set before updating data
         self.update_user_data()
 
     def update_user_data(self):
         if not self.tokens:
             return
+
+        if self.is_token_expired(self.tokens["access"]):
+            if not self.refresh_token():
+                print("Failed to refresh token")
+                return
 
         try:
             response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
@@ -132,12 +160,65 @@ class MainWindow(QWidget):
                 self.user_data.update(user_data)
                 self.userLabel.setText(self.user_data["username"])
                 self.accountPage.update_user_data(user_data)
+                self.subscriptionPage.update_user_data(user_data)
+            elif response.status_code == 401:
+                if self.refresh_token():
+                    response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+                        'Authorization': f'Bearer {self.tokens["access"]}'
+                    })
+                    if response.status_code == 200:
+                        user_data = response.json()
+                        self.user_data.update(user_data)
+                        self.userLabel.setText(self.user_data["username"])
+                        self.accountPage.update_user_data(user_data)
+                        self.subscriptionPage.update_user_data(user_data)
+                    else:
+                        print(f"Failed to fetch user data after refresh, status code: {response.status_code}, response: {response.json()}")
+                else:
+                    print("Failed to refresh token after receiving 401")
             else:
                 print(f"Failed to fetch user data, status code: {response.status_code}, response: {response.json()}")
         except Exception as e:
             print(f"Error while fetching user data: {e}")
 
+    def is_token_expired(self, token):
+        try:
+            payload = jwt.decode(token, options={"verify_signature": False})
+            exp = datetime.datetime.fromtimestamp(payload['exp'])
+            return exp < datetime.datetime.utcnow()
+        except jwt.ExpiredSignatureError:
+            return True
+        except jwt.InvalidTokenError:
+            return True
+
+    def refresh_token(self):
+        try:
+            response = requests.post('http://127.0.0.1:8000/api/token/refresh/', data={
+                'refresh': self.tokens["refresh"]
+            })
+
+            if response.status_code == 200:
+                new_tokens = response.json()
+                self.tokens.update(new_tokens)
+                print("Token refreshed successfully")
+                return True
+            else:
+                print(f"Failed to refresh token, status code: {response.status_code}, response: {response.json()}")
+                return False
+        except Exception as e:
+            print(f"Error while refreshing token: {e}")
+            return False
+
+    def logout(self):
+        self.tokens = None
+        self.user_data = {
+            "username": "---",
+            "subscription_end": "---",
+            "registration_date": "---"
+        }
+        self.switch_to_login()
+
     def start_timer(self):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_user_data)
-        self.timer.start(5000)
+        self.timer.start(10000)

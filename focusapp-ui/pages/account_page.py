@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore import Qt, QTimer
 import requests
 import datetime
+import jwt
 
 class AccountPage(QWidget):
     def __init__(self, user_data, switch_to_change_password):
@@ -93,6 +94,11 @@ class AccountPage(QWidget):
         if not self.tokens:
             return
 
+        if self.is_token_expired(self.tokens["access"]):
+            if not self.refresh_token():
+                print("Failed to refresh token")
+                return
+
         try:
             response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
                 'Authorization': f'Bearer {self.tokens["access"]}'
@@ -101,15 +107,58 @@ class AccountPage(QWidget):
             if response.status_code == 200:
                 user_data = response.json()
                 self.usernameLabel.setText(f"Имя пользователя: {user_data.get('username', '---')}")
-                self.subscriptionEndLabel.setText(f"Активна до {self.format_date(user_data.get('subscription_end', '---'))}")
+                self.subscriptionEndLabel.setText(f"Активна до {self.format_date(user_data.get('subscription_end', '---') or '---')}")
                 self.registrationDateLabel.setText(self.format_date(user_data.get('registration_date', '---')))
                 print(f"Fetched user data: {user_data}")
+            elif response.status_code == 401:
+                if self.refresh_token():
+                    response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+                        'Authorization': f'Bearer {self.tokens["access"]}'
+                    })
+                    if response.status_code == 200:
+                        user_data = response.json()
+                        self.usernameLabel.setText(f"Имя пользователя: {user_data.get('username', '---')}")
+                        self.subscriptionEndLabel.setText(f"Активна до {self.format_date(user_data.get('subscription_end', '---') or '---')}")
+                        self.registrationDateLabel.setText(self.format_date(user_data.get('registration_date', '---')))
+                        print(f"Fetched user data: {user_data}")
+                    else:
+                        print(f"Failed to fetch user data after refresh, status code: {response.status_code}, response: {response.json()}")
+                else:
+                    print("Failed to refresh token after receiving 401")
             else:
-                print(f"Failed to fetch user data, status code: {response.status_code}")
+                print(f"Failed to fetch user data, status code: {response.status_code}, response: {response.json()}")
         except Exception as e:
             print(f"Error while fetching user data: {e}")
+
+    def is_token_expired(self, token):
+        try:
+            payload = jwt.decode(token, options={"verify_signature": False})
+            exp = datetime.datetime.fromtimestamp(payload['exp'])
+            return exp < datetime.datetime.utcnow()
+        except jwt.ExpiredSignatureError:
+            return True
+        except jwt.InvalidTokenError:
+            return True
+
+    def refresh_token(self):
+        try:
+            response = requests.post('http://127.0.0.1:8000/api/token/refresh/', data={
+                'refresh': self.tokens["refresh"]
+            })
+
+            if response.status_code == 200:
+                new_tokens = response.json()
+                self.tokens.update(new_tokens)
+                print("Token refreshed successfully")
+                return True
+            else:
+                print(f"Failed to refresh token, status code: {response.status_code}, response: {response.json()}")
+                return False
+        except Exception as e:
+            print(f"Error while refreshing token: {e}")
+            return False
 
     def start_timer(self):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_user_data)
-        self.timer.start(5000)
+        self.timer.start(10000)
