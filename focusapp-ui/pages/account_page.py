@@ -1,7 +1,7 @@
-
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore import Qt, QTimer
 import requests
+import datetime
 
 class AccountPage(QWidget):
     def __init__(self, user_data, switch_to_change_password):
@@ -10,6 +10,7 @@ class AccountPage(QWidget):
         self.switch_to_change_password = switch_to_change_password
         self.tokens = None
         self.initUI()
+        self.start_timer()
 
     def initUI(self):
         self.layout = QVBoxLayout(self)
@@ -24,7 +25,7 @@ class AccountPage(QWidget):
 
         self.subscriptionLabel = QLabel("Подписка", self)
         self.subscriptionLabel.setStyleSheet("color: white; font-size: 18px; font-weight: bold; border: none")
-        self.subscriptionEndLabel = QLabel(f"Активна до {self.user_data.get('subscription_end', '---')}", self)
+        self.subscriptionEndLabel = QLabel(f"Активна до {self.format_date(self.user_data.get('subscription_end', '---'))}", self)
         self.subscriptionEndLabel.setStyleSheet("color: white; font-size: 20px; border: none")
 
         self.subscriptionBox = QWidget()
@@ -40,7 +41,7 @@ class AccountPage(QWidget):
 
         self.registrationLabel = QLabel("Дата регистрации", self)
         self.registrationLabel.setStyleSheet("color: white; font-size: 18px; font-weight: bold; border: none")
-        self.registrationDateLabel = QLabel(self.user_data.get('registration_date', '---'), self)
+        self.registrationDateLabel = QLabel(self.format_date(self.user_data.get('registration_date', '---')), self)
         self.registrationDateLabel.setStyleSheet("color: white; font-size: 20px; border: none")
 
         self.registrationBox = QWidget()
@@ -81,6 +82,13 @@ class AccountPage(QWidget):
         self.tokens = tokens
         self.update_user_data()
 
+    def format_date(self, date_str):
+        try:
+            date_obj = datetime.datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            return date_obj.strftime('%Y-%m-%d')
+        except ValueError:
+            return '---'
+
     def update_user_data(self):
         if not self.tokens:
             return
@@ -93,8 +101,8 @@ class AccountPage(QWidget):
             if response.status_code == 200:
                 user_data = response.json()
                 self.usernameLabel.setText(f"Имя пользователя: {user_data.get('username', '---')}")
-                self.subscriptionEndLabel.setText(f"Активна до {user_data.get('subscription_end', '---')}")
-                self.registrationDateLabel.setText(user_data.get('registration_date', '---'))
+                self.subscriptionEndLabel.setText(f"Активна до {self.format_date(user_data.get('subscription_end', '---'))}")
+                self.registrationDateLabel.setText(self.format_date(user_data.get('registration_date', '---')))
                 print(f"Fetched user data: {user_data}")
             else:
                 print(f"Failed to fetch user data, status code: {response.status_code}")
@@ -105,4 +113,3 @@ class AccountPage(QWidget):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_user_data)
         self.timer.start(5000)
-
