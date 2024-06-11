@@ -114,9 +114,10 @@ class LoginWindow(QWidget):
 
         if response.status_code == 200:
             tokens = response.json()
-            # Save the token for subsequent requests
-            self.switch_to_main()
+            self.switch_to_main(tokens)  # Передача токенов
         else:
             error_label = QLabel("Ошибка входа. Проверьте логин и пароль.")
             error_label.setStyleSheet("color: red;")
             self.layout().addWidget(error_label)
+
+

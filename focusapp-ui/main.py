@@ -29,8 +29,10 @@ class MainApp(QStackedWidget):
     def switch_to_login(self):
         self.setCurrentIndex(0)
 
-    def switch_to_main(self):
+    def switch_to_main(self, tokens):
+        self.mainWindow.set_tokens(tokens)
         self.setCurrentIndex(2)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -1,24 +1,28 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QListWidget, QStackedWidget, QHBoxLayout
 from PyQt5.QtGui import QFont, QPalette, QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
+import requests
 
-from pages.account_page import AccountPage
-from pages.binds_page import BindsPage
-from pages.subscription_page import SubscriptionPage
-from pages.settings_page import SettingsPage
-from pages.change_password_page import ChangePasswordPage
+from .account_page import AccountPage
+from .binds_page import BindsPage
+from .subscription_page import SubscriptionPage
+from .settings_page import SettingsPage
+from .change_password_page import ChangePasswordPage
+
 
 class MainWindow(QWidget):
     def __init__(self, switch_to_login, main_app):
         super().__init__()
         self.switch_to_login = switch_to_login
         self.main_app = main_app
+        self.tokens = None
         self.user_data = {
-            "username": "Artem#1",
-            "subscription_end": "08.01.2023",
-            "registration_date": "08.01.2032"
+            "username": "---",
+            "subscription_end": "---",
+            "registration_date": "---"
         }
         self.initUI()
+        self.start_timer()
 
     def initUI(self):
         self.setWindowTitle("FocusAPP")
@@ -30,13 +34,13 @@ class MainWindow(QWidget):
         # Верхняя панель
         topLayout = QHBoxLayout()
         topLayout.setAlignment(Qt.AlignRight)
-        userLabel = QLabel(self.user_data["username"])
-        userLabel.setStyleSheet("color: white; font-size: 24px; ")
+        self.userLabel = QLabel(self.user_data["username"])
+        self.userLabel.setStyleSheet("color: white; font-size: 24px; ")
         logoutButton = QPushButton("выйти")
         logoutButton.setFixedSize(100, 40)
         logoutButton.setStyleSheet("color: white; background-color: #282B3A; border: none; font-size: 24px;")
         logoutButton.clicked.connect(self.switch_to_login)
-        topLayout.addWidget(userLabel)
+        topLayout.addWidget(self.userLabel)
         topLayout.addWidget(logoutButton)
 
         # Левый боковой список
@@ -106,3 +110,33 @@ class MainWindow(QWidget):
 
     def switch_to_account(self):
         self.contentWidget.setCurrentWidget(self.accountPage)
+
+    def set_tokens(self, tokens):
+        self.tokens = tokens
+        self.accountPage.set_tokens(tokens)
+        self.update_user_data()
+
+    def update_user_data(self):
+        if not self.tokens:
+            return
+
+        try:
+            response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+                'Authorization': f'Bearer {self.tokens["access"]}'
+            })
+
+            if response.status_code == 200:
+                user_data = response.json()
+                print(f"User data: {user_data}")
+                self.user_data.update(user_data)
+                self.userLabel.setText(self.user_data["username"])
+                self.accountPage.update_user_data(user_data)
+            else:
+                print(f"Failed to fetch user data, status code: {response.status_code}, response: {response.json()}")
+        except Exception as e:
+            print(f"Error while fetching user data: {e}")
+
+    def start_timer(self):
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_user_data)
+        self.timer.start(5000)
