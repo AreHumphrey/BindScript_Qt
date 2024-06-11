@@ -16,4 +16,4 @@ class HwidCheckSerializer(serializers.Serializer):
 class SubscriptionUpdateSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     subscription_type = serializers.CharField(max_length=50)
-    duration_days = serializers.IntegerField()  # Новое поле для количества дней
+    duration_days = serializers.IntegerField()

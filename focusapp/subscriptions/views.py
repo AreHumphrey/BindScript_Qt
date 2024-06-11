@@ -1,4 +1,4 @@
-# focusapp/subscriptions/views.py
+
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -69,7 +69,7 @@ def update_subscription(request):
                 subscription.save()
 
             user.subscription = subscription
-            user.subscription_end = subscription.end_date  # Обновление subscription_end у пользователя
+            user.subscription_end = subscription.end_date
             user.save()
 
             return Response({'message': 'Subscription updated successfully'}, status=status.HTTP_200_OK)
