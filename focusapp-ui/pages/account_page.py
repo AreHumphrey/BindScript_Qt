@@ -100,7 +100,7 @@ class AccountPage(QWidget):
                 return
 
         try:
-            response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+            response = requests.get('http://46.101.81.78/api/users/me/', headers={
                 'Authorization': f'Bearer {self.tokens["access"]}'
             })
 
@@ -112,7 +112,7 @@ class AccountPage(QWidget):
                 print(f"Fetched user data: {user_data}")
             elif response.status_code == 401:
                 if self.refresh_token():
-                    response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+                    response = requests.get('http://46.101.81.78/api/users/me/', headers={
                         'Authorization': f'Bearer {self.tokens["access"]}'
                     })
                     if response.status_code == 200:
@@ -142,7 +142,7 @@ class AccountPage(QWidget):
 
     def refresh_token(self):
         try:
-            response = requests.post('http://127.0.0.1:8000/api/token/refresh/', data={
+            response = requests.post('http://46.101.81.78/api/token/refresh/', data={
                 'refresh': self.tokens["refresh"]
             })
 

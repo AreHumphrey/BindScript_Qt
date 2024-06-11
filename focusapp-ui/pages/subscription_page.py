@@ -56,7 +56,7 @@ class SubscriptionPage(QWidget):
                 return
 
         try:
-            response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+            response = requests.get('http://46.101.81.78/api/users/me/', headers={
                 'Authorization': f'Bearer {self.tokens["access"]}'
             })
 
@@ -66,7 +66,7 @@ class SubscriptionPage(QWidget):
                 self.usernameLabel.setText(f"Ваш айди - {self.user_data.get('username', '---')}")
             elif response.status_code == 401:
                 if self.refresh_token():
-                    response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+                    response = requests.get('http://46.101.81.78/api/users/me/', headers={
                         'Authorization': f'Bearer {self.tokens["access"]}'
                     })
                     if response.status_code == 200:
@@ -94,7 +94,7 @@ class SubscriptionPage(QWidget):
 
     def refresh_token(self):
         try:
-            response = requests.post('http://127.0.0.1:8000/api/token/refresh/', data={
+            response = requests.post('http://46.101.81.78/api/token/refresh/', data={
                 'refresh': self.tokens["refresh"]
             })
 

@@ -156,7 +156,7 @@ class RegisterWindow(QWidget):
             self.show_error("Пароли не совпадают")
             return
 
-        response = requests.post('http://127.0.0.1:8000/api/users/register/', data={
+        response = requests.post('http://46.101.81.78/api/users/register/', data={
             'username': username,
             'email': email,
             'password': password,

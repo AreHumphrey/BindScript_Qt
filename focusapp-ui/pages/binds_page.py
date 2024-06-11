@@ -28,7 +28,7 @@ class BindsPage(QWidget):
             bindLabel.setStyleSheet("color: white; font-size: 24px; padding: 10px; border: none")
             bindInput = QLineEdit(bind["key"])
             bindInput.setFixedSize(120, 70)
-            bindInput.setMaxLength(1)  # Ограничить ввод одним символом
+            bindInput.setMaxLength(1)
             bindInput.setStyleSheet("""
                 color: white;
                 background-color: #282B3A;
@@ -57,7 +57,7 @@ class BindsPage(QWidget):
         self.setup_global_hotkeys()
 
     def setup_global_hotkeys(self):
-        keyboard.unhook_all()  # Удалить все ранее установленные горячие клавиши
+        keyboard.unhook_all()
         for bind in self.binds:
             if bind["key"]:
                 keyboard.add_hotkey(bind["key"], lambda b=bind: self.toggle_script(b))

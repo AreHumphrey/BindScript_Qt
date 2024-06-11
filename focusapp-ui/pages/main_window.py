@@ -108,27 +108,27 @@ class MainWindow(QWidget):
         self.setLayout(mainLayout)
 
     def handle_page_change(self, index):
-        if index == 1:  # Индекс вкладки "Бинды"
+        if index == 1:
             subscription_end = self.user_data.get('subscription_end', None)
             if subscription_end:
                 try:
                     end_date = datetime.datetime.fromisoformat(subscription_end.replace('Z', '+00:00'))
                     if end_date < datetime.datetime.now():
-                        self.listWidget.setCurrentRow(0)  # Возвращаемся на вкладку "Аккаунт"
+                        self.listWidget.setCurrentRow(0)
                         QMessageBox.warning(self, "Доступ запрещен", "Ваша подписка истекла. Пожалуйста, обновите подписку.")
                         return
                 except ValueError:
-                    self.listWidget.setCurrentRow(0)  # Возвращаемся на вкладку "Аккаунт"
+                    self.listWidget.setCurrentRow(0)
                     QMessageBox.warning(self, "Доступ запрещен", "Неправильная дата окончания подписки. Пожалуйста, свяжитесь с поддержкой.")
                     return
             else:
-                self.listWidget.setCurrentRow(0)  # Возвращаемся на вкладку "Аккаунт"
+                self.listWidget.setCurrentRow(0)
                 QMessageBox.warning(self, "Доступ запрещен", "Подписка не найдена. Пожалуйста, приобретите подписку.")
                 return
         self.contentWidget.setCurrentIndex(index)
 
     def switch_to_change_password(self):
-        self.changePasswordPage.tokens = self.tokens  # Ensure tokens are set before switching
+        self.changePasswordPage.tokens = self.tokens
         self.contentWidget.setCurrentWidget(self.changePasswordPage)
 
     def switch_to_account(self):
@@ -137,7 +137,7 @@ class MainWindow(QWidget):
     def set_tokens(self, tokens):
         self.tokens = tokens
         self.accountPage.set_tokens(tokens)
-        self.subscriptionPage.set_tokens(tokens)  # Ensure tokens are set before updating data
+        self.subscriptionPage.set_tokens(tokens)
         self.update_user_data()
 
     def update_user_data(self):
@@ -150,7 +150,7 @@ class MainWindow(QWidget):
                 return
 
         try:
-            response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+            response = requests.get('http://46.101.81.78/api/users/me/', headers={
                 'Authorization': f'Bearer {self.tokens["access"]}'
             })
 
@@ -163,7 +163,7 @@ class MainWindow(QWidget):
                 self.subscriptionPage.update_user_data(user_data)
             elif response.status_code == 401:
                 if self.refresh_token():
-                    response = requests.get('http://127.0.0.1:8000/api/users/me/', headers={
+                    response = requests.get('http://46.101.81.78/api/users/me/', headers={
                         'Authorization': f'Bearer {self.tokens["access"]}'
                     })
                     if response.status_code == 200:
@@ -193,7 +193,7 @@ class MainWindow(QWidget):
 
     def refresh_token(self):
         try:
-            response = requests.post('http://127.0.0.1:8000/api/token/refresh/', data={
+            response = requests.post('http://46.101.81.78/api/token/refresh/', data={
                 'refresh': self.tokens["refresh"]
             })
 
