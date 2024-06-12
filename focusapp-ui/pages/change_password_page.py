@@ -95,7 +95,7 @@ class ChangePasswordPage(QWidget):
         }
 
         try:
-            response = requests.put('http://46.101.81.78/api/users/change-password/', headers=headers, data=data)
+            response = requests.put('http://pybyte.ru/api/users/change-password/', headers=headers, data=data)
 
             if response.status_code == 200:
                 print("Пароль изменен успешно")

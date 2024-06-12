@@ -107,14 +107,14 @@ class LoginWindow(QWidget):
     def handle_login(self):
         username = self.usernameInput.text()
         password = self.passwordInput.text()
-        response = requests.post('http://46.101.81.78/api/users/login/', data={
+        response = requests.post('http://pybyte.ru/api/users/login/', data={
             'username': username,
             'password': password
         })
 
         if response.status_code == 200:
             tokens = response.json()
-            self.switch_to_main(tokens)
+            self.switch_to_main(tokens)  # Передача токенов
         else:
             error_label = QLabel("Ошибка входа. Проверьте логин и пароль.")
             error_label.setStyleSheet("color: red;")
